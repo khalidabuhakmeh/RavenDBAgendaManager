@@ -50,8 +50,6 @@ public class Agenda(IDocumentStore store) : PageModel
             record.Items.Clear();
             record.Items.AddRange(Items);
             
-            session.Store(record);
-            
             await session.SaveChangesAsync();
 
             return RedirectToPage("Agenda", new { id = record.Id });
