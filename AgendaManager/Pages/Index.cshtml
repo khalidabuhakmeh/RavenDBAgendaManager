@@ -1,0 +1,43 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<form asp-page="Index" method="post">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <div class="input-group">
+            <input asp-for="Name"
+                   type="text"
+                   autocomplete="off" data-1p-ignore data-bwignore data-lpignore="true"
+                   class="form-control" placeholder="Add a new agenda..." autofocus="autofocus">
+            <button class="btn btn-outline-primary" type="submit">
+                Add
+            </button>
+        </div>
+        <span asp-validation-for="Name" class="form-text text-danger"></span>
+    </div>
+</form>
+
+@if (!Model.Results.Any())
+{
+    <div class="alert alert-info" role="alert">
+        No agendas.
+    </div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var agenda in Model.Results)
+        {
+            <a href="@Url.Page("Agenda", new { agenda.Id })" class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+
+                    <div class="fw-bold">@agenda.Name</div>
+                </div>
+                <span class="badge rounded-pill bg-primary">@agenda.Items.Count</span>
+            </a>
+        }
+    </div>
+}

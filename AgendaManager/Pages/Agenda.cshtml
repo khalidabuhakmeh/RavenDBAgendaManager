@@ -1,0 +1,91 @@
+@page "{id:encrypt}"
+@model AgendaManager.Pages.Agenda
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-page="Index">Home</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.DisplayName</li>
+    </ol>
+</nav>
+
+<h1 class="mb-3">
+    @Model.DisplayName
+    <hr/>
+</h1>
+
+<form asp-page="Agenda" asp-route-id="@Model.Id" method="post">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control">
+        <span asp-validation-for="Name" class="form-text text-danger"></span>
+    </div>
+
+    <h3 class="mb-3">Items</h3>
+    <div id="items">
+        @foreach (var item in Model.Items)
+        {
+            var index = Guid.NewGuid().ToString("N");
+            <div class="item mb-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text handle">⌯</span>
+                    <div class="input-group-text">
+                        <input class="form-check-input mt-0" type="checkbox" name="Items[@index].Done" value="true" checked="@(item.Done ? "checked" : null)">
+                    </div>
+                    <input type="text" class="form-control" aria-label="Text input with checkbox" name="Items[@index].Text" value="@item.Text">
+                    <input type="hidden" name="Items.Index" value="@index"/>
+                    <button class="btn btn-outline-danger remove" type="button">x</button>
+                </div>
+            </div>
+        }
+
+        <div class="item mb-3">
+            <div class="input-group mb-3">
+                <span class="input-group-text handle">⌯</span>
+                <div class="input-group-text">
+                    <input class="form-check-input mt-0" type="checkbox" name="Items[new].Done" value="true">
+                </div>
+                <input type="text" class="form-control" aria-label="Text input with checkbox" name="Items[new].Text" placeholder="New task item..." autofocus="autofocus">
+                <input type="hidden" name="Items.Index" value="new"/>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Save
+    </button>
+
+</form>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(document).keyup(function(e) {
+                if (e.keyCode === 27 /* Escape */) {
+                    window.location.href = '@Url.Page("Index")'; 
+                }
+            });
+        
+            // focus on the first error instead
+            $('.input-validation-error').focus();
+        
+            $('#items').sortable({
+                handle: ".handle",
+                draggable: ".item"
+            });
+            
+            $('.remove').click(function (el) {
+                let item = $(el.target).closest('.item');
+                if(item.length) {
+                    if (confirm('Are you sure you want to remove this item?')) {
+                        item.fadeOut(400, function() {
+                            item.remove();
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+}
