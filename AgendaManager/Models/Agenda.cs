@@ -2,7 +2,7 @@ namespace AgendaManager.Models;
 
 public class Agenda
 {
-    public string Id { get; set; } = default!;
+    public Guid Id { get; set; }
     public string Name { get; set; } = default!;
     public List<Item> Items { get; set; } = new();
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
@@ -10,6 +10,6 @@ public class Agenda
 
 public class Item
 {
-    public string Text { get; set; } = "";
+    public string? Text { get; set; } = "";
     public bool Done { get; set; } = false;
 }

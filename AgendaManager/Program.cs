@@ -1,5 +1,6 @@
 using AgendaManager.Infrastructure;
-using Raven.Client.Documents;
+using Marten;
+using Weasel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -12,12 +13,12 @@ builder.Services.Configure<RouteOptions>(opt =>  {
     opt.ConstraintMap.Add("encrypt", typeof(EncryptedParameter));
 });
 
-builder.Services.AddSingleton<IDocumentStore>(_ =>
-    new DocumentStore
-    {
-        Database = "Productivity",
-        Urls = [config.GetConnectionString("server")],
-    }.Initialize());
+builder.Services.AddMarten(options => {
+        options.Connection(config.GetConnectionString("server")!);
+        options.UseSystemTextJsonForSerialization();
+        options.AutoCreateSchemaObjects = AutoCreate.All;
+    }
+);
 
 var app = builder.Build();
 

@@ -12,8 +12,8 @@ public class EncryptedParameter(IDataProtectionProvider dataProtectionProvider) 
 
     public string? TransformOutbound(object? value)
     {
-        if (value is not string s) return null;
-        return protector.Protect(s);
+        return value is not null
+            ? protector.Protect(value.ToString()!) : null;
     }
 
     public Task BindModelAsync(ModelBindingContext bindingContext)
@@ -21,10 +21,18 @@ public class EncryptedParameter(IDataProtectionProvider dataProtectionProvider) 
         var key = bindingContext.FieldName;
         var valueProviderResult = bindingContext.ValueProvider.GetValue(key);
 
-        if (valueProviderResult.FirstValue is { } value)
+        if (valueProviderResult.FirstValue is not { } value) return Task.CompletedTask;
+        
+        var result = protector.Unprotect(value);
+        if (bindingContext.ModelType == typeof(Guid))
         {
-            var result = protector.Unprotect(value);
-            bindingContext.Result = ModelBindingResult.Success(result);
+            bindingContext.Result = ModelBindingResult.Success(Guid.Parse(result));    
+        }
+        else
+        {
+            // try to change string to something "normal", will probably fail on weirdo types
+            var converted = Convert.ChangeType(result, bindingContext.ModelType);
+            bindingContext.Result = ModelBindingResult.Success(converted);
         }
 
         return Task.CompletedTask;

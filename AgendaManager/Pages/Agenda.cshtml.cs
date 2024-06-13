@@ -1,17 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using AgendaManager.Infrastructure;
+using Marten;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Raven.Client.Documents;
 
 namespace AgendaManager.Pages;
 
 public class Agenda(IDocumentStore store) : PageModel
 {
     [BindProperty(SupportsGet = true, BinderType = typeof(EncryptedParameter))]
-    public string? Id { get; set; }
-    
-    public string DisplayName { get; set; }
+    public Guid Id { get; set; } = default!;
+
+    public string DisplayName { get; set; } = "";
 
     [BindProperty, Required]
     public string? Name { get; set; }
@@ -19,19 +19,25 @@ public class Agenda(IDocumentStore store) : PageModel
     [BindProperty]
     public List<Models.Item> Items { get; set; } = new();
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
-        using var session = store.OpenAsyncSession();
-        var result =  await session.LoadAsync<Models.Agenda>(Id);
+        await using var session = store.LightweightSession();
+        var record =  await session.LoadAsync<Models.Agenda>(Id);
         
-        Items = result.Items;
-        DisplayName = Name = result.Name;
+        if (record is null) return NotFound();
+        
+        Items = record.Items;
+        DisplayName = Name = record.Name;
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPost()
     {
-        using var session = store.OpenAsyncSession();
+        await using var session = store.DirtyTrackedSession();
         var record = await session.LoadAsync<Models.Agenda>(Id);
+
+        if (record is null) return NotFound();
 
         DisplayName = record.Name;
         
@@ -43,7 +49,9 @@ public class Agenda(IDocumentStore store) : PageModel
             record.Name = Name!;
             record.Items.Clear();
             record.Items.AddRange(Items);
-
+            
+            session.Store(record);
+            
             await session.SaveChangesAsync();
 
             return RedirectToPage("Agenda", new { id = record.Id });
