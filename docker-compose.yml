@@ -1,0 +1,38 @@
+version: '3.4'
+
+services:
+  # docker-compose up -d ravendb
+  ravendb:
+    container_name: ravendb
+    image: ravendb/ravendb:ubuntu-latest
+    ports:
+      - "8080:8080"
+      - "38888:38888"
+    environment:
+      - RAVEN_SETTINGS={}
+      - RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork
+      - RAVEN_Setup_Mode=None
+      - RAVEN_License_Eula_Accepted=true
+      - RAVEN_ServerUrl=http://0.0.0.0:8080
+      - RAVEN_ServerUrl_Tcp=tcp://0.0.0.0:38888
+    volumes:
+      # /var/lib/docker/volumes/ravendbagendamanager_ravendb_data/_data
+      - ravendb_data:/var/lib/ravendb/data
+
+  agendamanager:
+    image: agendamanager
+    build:
+      context: .
+      dockerfile: AgendaManager/Dockerfile
+      args:
+        - configuration=Debug
+    ports:
+      - 5158:5158
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ~/.vsdbg:/remote_debugger:rw
+
+volumes:
+  ravendb_data:
+    driver: local

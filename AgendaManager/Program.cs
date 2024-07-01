@@ -1,5 +1,8 @@
 using AgendaManager.Infrastructure;
+using AgendaManager.Models.Indexes;
 using Raven.Client.Documents;
+using Raven.Client.ServerWide;
+using Raven.Client.ServerWide.Operations;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -8,18 +11,32 @@ var config = builder.Configuration;
 builder.Services.AddRazorPages();
 builder.Services.AddDataProtection();
 
-builder.Services.Configure<RouteOptions>(opt =>  {
+builder.Services.Configure<RouteOptions>(opt =>
+{
     opt.ConstraintMap.Add("encrypt", typeof(EncryptedParameter));
 });
 
+var databaseName = "Productivity";
+
 builder.Services.AddSingleton<IDocumentStore>(_ =>
-    new DocumentStore
     {
-        Database = "Productivity",
-        Urls = [config.GetConnectionString("server")],
-    }.Initialize());
+        var store = new DocumentStore
+        {
+            Database = databaseName,
+            Urls = [config.GetConnectionString("server")],
+        };
+
+        store.Initialize();
+        store.ExecuteIndex(new Agendas());
+        return store;
+    });
 
 var app = builder.Build();
+
+using var store = app.Services.GetRequiredService<IDocumentStore>();
+if (!store.DatabaseExists(databaseName)) {
+    await store.Maintenance.Server.SendAsync(new CreateDatabaseOperation(new DatabaseRecord(databaseName)));
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
