@@ -13,7 +13,7 @@ param ravendbAppName string = 'ravendb-app'
 @description('Name of the first Container App for AgendaManager')
 param agendaManagerAppName1 string = 'agendamanager-app1'
 
-var randomSuffix = take(uniqueString(resourceGroup().id, 'ravendbstorage'), 3)
+var randomSuffix = take(uniqueString(resourceGroup().id), 3)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   name: 'ravendbstorage${randomSuffix}'
