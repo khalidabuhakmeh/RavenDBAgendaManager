@@ -22,20 +22,6 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06
       name: 'PerGB2018'
     }
   }
-
-}
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
-  name: 'agendamanagerstorage'
-  location: location
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    accessTier: 'Hot'
-  }
-
 }
 
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2022-03-01' = {
@@ -49,9 +35,7 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2022-03-01' = {
         sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
       }
     }
-
   }
-
 }
 
 resource ravendbContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
@@ -110,9 +94,8 @@ resource ravendbContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
         }
       ]
     }
-
-    }
   }
+}
 
 resource agendaManagerContainerApp1 'Microsoft.App/containerApps@2022-03-01' = {
   name: agendaManagerAppName1
