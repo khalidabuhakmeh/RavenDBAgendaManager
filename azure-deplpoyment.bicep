@@ -13,6 +13,33 @@ param ravendbAppName string = 'ravendb-app'
 @description('Name of the first Container App for AgendaManager')
 param agendaManagerAppName1 string = 'agendamanager-app1'
 
+var randomSuffix = take(uniqueString(resourceGroup().id, 'ravendbstorage'), 3)
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
+  name: 'ravendbstorage${randomSuffix}'
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+  }
+}
+
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2021-04-01' = {
+  name: 'default'
+  parent: storageAccount
+}
+
+resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-04-01' = {
+  name: 'database'
+  parent: fileService
+  properties: {
+    accessTier: 'TransactionOptimized'
+  }
+}
+
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
   name: logAnalyticsWorkspaceName
   location: location
