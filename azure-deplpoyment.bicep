@@ -22,6 +22,30 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06
       name: 'PerGB2018'
     }
   }
+  storageAccountConfiguration: {
+    accountName: storageAccount.name
+    accountKey: listKeys(storageAccount.id, '2021-04-01').keys[0].value
+  }
+}
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
+  name: 'agendamanagerstorage'
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+  }
+}
+
+resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2021-04-01' = {
+  name: 'ravendb-volume'
+  parent: storageAccount
+  properties: {
+    accessTier: 'TransactionOptimized'
+  }
 }
 
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2022-03-01' = {
@@ -85,6 +109,22 @@ resource ravendbContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
               value: 'tcp://0.0.0.0:38888'
             }
           ]
+          volumeMounts: [
+            {
+              name: 'ravendb-volume'
+              mountPath: '/var/lib/ravendb/data'
+            }
+          ]
+        }
+      ]
+    }
+    volumes: [
+      {
+        name: 'ravendb-volume'
+        storageType: 'AzureFile'
+        storageAccountName: storageAccount.name
+        shareName: fileShare.name
+        accessMode: 'ReadWrite'
         }
       ]
     }
