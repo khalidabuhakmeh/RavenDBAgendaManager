@@ -79,7 +79,8 @@ resource ravendbStorage 'Microsoft.App/managedEnvironments/storages@2022-03-01' 
   }
 }
 
-resource ravendbContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
+
+resource ravendbContainerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: ravendbAppName
   location: location
   properties: {
@@ -143,6 +144,7 @@ resource ravendbContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'ravendb-volume'
           storageName:  ravendbStorage.name
           storageType: 'AzureFile'
+          mountOptions: 'dir_mode=0777,file_mode=0777,uid=1001,gid=1001,mfsymlinks,nobrl'
         }
       ]
     }

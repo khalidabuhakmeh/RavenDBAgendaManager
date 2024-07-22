@@ -31,3 +31,7 @@ Run the project and it will create a new database called **"Productivity"** and 
 - Application assumes one user but could be made to support multiple users with the addition of identity.
 
 🍻 Cheers!
+
+## References
+
+- https://learn.microsoft.com/en-us/azure/templates/microsoft.app/2023-05-01/containerapps?pivots=deployment-language-bicep
