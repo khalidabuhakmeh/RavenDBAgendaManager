@@ -62,6 +62,20 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2022-03-01' = {
         sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
       }
     }
+   
+  }
+}
+
+resource ravendbStorage 'Microsoft.App/managedEnvironments/storages@2022-03-01' = {
+  name: 'ravendbstorage'
+  parent: containerAppEnv
+  properties: {
+    azureFile: {
+      accessMode: 'ReadWrite'
+      accountKey: storageAccount.listKeys().keys[0].value
+      accountName: storageAccount.name
+      shareName: 'database'
+    }
   }
 }
 
@@ -120,7 +134,19 @@ resource ravendbContainerApp 'Microsoft.App/containerApps@2022-03-01' = {
           ]
         }
       ]
+      scale: {
+        minReplicas: 1
+        maxReplicas: 1
+      }
+      volumes: [
+        {
+          name: 'ravendb-volume'
+          storageName:  ravendbStorage.name
+          storageType: 'AzureFile'
+        }
+      ]
     }
+
   }
 }
 
