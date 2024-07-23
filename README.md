@@ -5,12 +5,12 @@ This is a demo application for an Agenda manager (yes, a todo app) that uses ASP
 To get started you'll need to run a RavenDB instance using Docker with the following command.
 
 ```bash
-docker run -p 8080:8080 ravendb/ravendb:ubuntu-latest
+    
+    docker-compose up -d ravendb
 ```
 
-You'll need to initialize the database, and create a new database called **"Productivity"**.
+Run the project and it will create a new database called **"Productivity"** and index **Agendas**.
 
-From there you can run this project.
 
 ## Advantages to RavenDB
 
@@ -31,3 +31,7 @@ From there you can run this project.
 - Application assumes one user but could be made to support multiple users with the addition of identity.
 
 🍻 Cheers!
+
+## References
+
+- https://learn.microsoft.com/en-us/azure/templates/microsoft.app/2023-05-01/containerapps?pivots=deployment-language-bicep
